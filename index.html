@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background: linear-gradient(#0084ff, #04d2e9); /* Orange to White gradient */
+            overflow: hidden; /* Prevent horizontal scroll due to animation */
+        }
+
+        .login-title {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 48px;
+            color: #fff;
+        }
+
+        .college-name {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .login-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.8); /* Slightly transparent black background */
+            box-sizing: border-box;
+            border-radius: 10px;
+            border: 2px solid transparent; /* Initial transparent border */
+            animation: borderAnimation 5s linear infinite alternate; /* Border animation */
+        }
+
+        @keyframes borderAnimation {
+    0% {
+        border-color: #f00; /* Red border color */
+        box-shadow: 0 0 15px #f00; /* Red shadow */
+    }
+    25% {
+        border-color: #0f0; /* Green border color */
+        box-shadow: 0 0 15px #0f0; /* Green shadow */
+    }
+    50% {
+        border-color: #00f; /* Blue border color */
+        box-shadow: 0 0 15px #00f; /* Blue shadow */
+    }
+    75% {
+        border-color: #0f0; /* Green border color */
+        box-shadow: 0 0 15px #0f0; /* Green shadow */
+    }
+    100% {
+        border-color: #f00; /* Back to red border color */
+        box-shadow: 0 0 15px #f00; /* Red shadow */
+    }
+}
+
+
+        .login-box h2 {
+            margin: 0 0 30px;
+            padding: 0;
+            color: #fff;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .login-box .user-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .login-box .user-box input {
+            width: 100%;
+            padding: 10px 0;
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 10px;
+            border: none;
+            border-bottom: 2px solid #fff;
+            outline: none;
+            background: transparent;
+            transition: border-bottom-color 0.5s;
+        }
+
+        .login-box .user-box input:focus {
+            border-bottom-color: #FF6347; /* Darker Orange when focused */
+        }
+
+        .login-box .user-box label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 10px 0;
+            font-size: 18px;
+            color: #fff;
+            pointer-events: none;
+            transition: .5s;
+        }
+
+        .login-box .user-box input:focus ~ label,
+        .login-box .user-box input:valid ~ label {
+            top: -20px;
+            left: 0;
+            color: #FF4500; /* Dark Orange when focused or has content */
+            font-size: 14px;
+        }
+
+        .login-box form a {
+            display: block;
+            width: 100%;
+            padding: 10px 0;
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            text-decoration: none;
+            text-transform: uppercase;
+            overflow: hidden;
+            transition: .5s;
+            letter-spacing: 2px;
+            border-radius: 5px;
+        }
+
+        .login-box form a:hover {
+            background: #FF6347; /* Light Coral color on hover */
+            box-shadow: 0 0 10px #FF6347,
+                        0 0 20px #FF6347,
+                        0 0 30px #FF6347;
+        }
+
+        .login-box form a span {
+            position: relative;
+            display: inline-block;
+            transition: .5s;
+        }
+
+        .login-box form a span:before,
+        .login-box form a span:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #FF4500; /* Dark Orange color */
+            transition: .5s;
+        }
+
+        .login-box form a span:before {
+            top: 0;
+            left: 100%;
+        }
+
+        .login-box form a span:after {
+            bottom: 0;
+            right: 100%;
+        }
+
+        .login-box form a:hover span:before,
+        .login-box form a:hover span:after {
+            left: 0;
+            right: 0;
+        }
+
+        .login-box .error-message {
+            color: #ff7b00;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="login-title">Electronics and Communication Engineering</h1>
+    <h2 class="college-name">Sreenivasa Institute of Technology and Management Studies (SITAMS)</h2>
+
+    <div class="login-box">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="user-box">
+                <input type="text" name="username" id="username" required>
+                <label>Username</label>
+            </div>
+            <div class="user-box">
+                <input type="password" name="password" id="password" required>
+                <label>Password</label>
+            </div>
+            <a href="#" onclick="validateLogin()">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                Submit
+            </a>
+            <p class="error-message" id="errorMessage"></p>
+        </form>
+    </div>
+
+    <script>
+        function validateLogin() {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            switch (username) {
+                case 'pavan':
+                    if (password === 'pavan@23') {
+                        window.location.href = 'file:///C:/Users/UDAYAGIRIPAVANKUMAR/OneDrive/Desktop/pavan/index12.html';
+                    } else {
+                        displayErrorMessage();
+                    }
+                    break;
+                case 'monisha':
+                    if (password === 'pavan@23') {
+                        window.location.href = 'page2.html';
+                    } else {
+                        displayErrorMessage();
+                    }
+                    break;
+                default:
+                    displayErrorMessage();
+            }
+        }
+
+        function displayErrorMessage() {
+            document.getElementById('errorMessage').innerHTML = 'Invalid username or password';
+        }
+    </script>
+</body>
+</html>

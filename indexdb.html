@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Attendance</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        /* Additional Styles, Colors, and Animation Effects */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    overflow: auto; /* Change to 'auto' to enable scrolling */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(45deg, #ff8c00, #d9cece, #04dfe7);
+    background-size: 400% 400%;
+    animation: gradientAnimation 10s infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+
+        }
+
+        /* Header styles */
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #f6f4f2;
+        }
+
+        /* Main content styles */
+        main {
+            display: flex;
+            flex-direction: column;
+            /* Stack sections vertically */
+            margin: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        section {
+            padding: 20px;
+            margin-bottom: 20px;
+            /* Add margin to separate sections */
+            border-bottom: 1px solid #ddd;
+            overflow: hidden;
+            background: linear-gradient(45deg, rgb(5, 169, 219), #065fdc);
+            color: #fff;
+        }
+
+        h2 {
+            color: #ff8c00;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            color: #fffefe;
+        }
+
+        /* Checkbox styles */
+        input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* Animation effects */
+        .fade-in {
+            animation: fadeAnimation 1s ease-in;
+        }
+
+        .slide-down {
+            animation: slideDownAnimation 1s ease-out;
+        }
+
+        /* Absent students text color and animation */
+        .absent-student {
+            color: #ff0000;
+            /* Red color for absent students */
+            animation: pulseAnimation 1s ease infinite alternate;
+        }
+
+        /* Submit button style */
+        button[type="submit"] {
+            background-color: #ff6a00;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #4fedff;
+            /* Darker orange on hover */
+        }
+
+        /* Keyframes for pulse animation */
+        @keyframes pulseAnimation {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.05);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <h1>Student Attendance-c</h1>
+        </header>
+        <section>
+            <h2>Attendance Sheet</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Roll Number</th>
+                        <th>Attendance Status</th>
+                        <th>Student Number</th>
+                        <th>Parent Number</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                    <!-- Table content will be generated dynamically using JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">Total:</td>
+                        <td id="present-count">0</td>
+                        <td id="absent-count">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+        <section>
+            <h2>Submit Attendance</h2>
+            <div id="absent-students-list">
+                <p>Absent Students:</p>
+                <ul id="absent-students-rolls"></ul>
+            </div>
+            <form id="attendance-form">
+                <div>
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div>
+                    <label for="period">Period:</label>
+                    <input type="text" id="period" name="period" required>
+                </div>
+                <button type="submit">Submit Attendance</button>
+            </form>
+        </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+        apiKey: "AIzaSyDj4HzXyTNNSeHMVrhhdDy_SXH63YjvDeI",
+        authDomain: "venkata-123.firebaseapp.com",
+        databaseURL: "https://venkata-123-default-rtdb.firebaseio.com",
+        projectId: "venkata-123",
+        storageBucket: "venkata-123.appspot.com",
+        messagingSenderId: "996483722916",
+        appId: "1:996483722916:web:fe538cdd928d7174d38031",
+        measurementId: "G-HGPMC1WKBQ"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        const students = [
+            { name: "Nagendra", rollNumber: "20751A04B3", studentNumber: "", parentNumber: "9392792607" },
+            { name: "Riteesh", rollNumber: "20751A04B4", studentNumber: "6302754998", parentNumber: "6281947506" },
+            { name: "Pandugola Vaishnavi", rollNumber: "20751A04B5", studentNumber: "9392775297", parentNumber: "6281947506" },
+            { name: "Pedaballi Geethika", rollNumber: "20751A04B6", studentNumber: "8143206878", parentNumber: "6305295207" },
+            { name: "Penumucha Lokesh", rollNumber: "20751A04B7", studentNumber: "6305429139", parentNumber: "6281947506" },
+            {name: "Pallavip", rollNumber: "20751A04B8", studentNumber: "7013765192", parentNumber: "9493674964"},
+        {name: "P.chaithra", rollNumber: "20751A04B9", studentNumber: "6304652313", parentNumber: "9182554222"},
+        {name: "R A CHANDU", rollNumber: "20751A04C1", studentNumber: "", parentNumber: ""},
+        {name: "R Aravind ", rollNumber: "20751A04C2", studentNumber: "7075775013", parentNumber: "8179686557"},
+        {name: "R Deepa", rollNumber: "20751A04C3 ", studentNumber: "8074133833", parentNumber: "9148266503"},
+        {name: "R prathyusha", rollNumber: "20751A04C4", studentNumber: "", parentNumber: ""},
+        {name: "S. Alisha", rollNumber: "20751A04C5", studentNumber: "7981252992", parentNumber: "8121927054"},
+        {name: "S Hari prasad", rollNumber: "20751A04C6", studentNumber: "", parentNumber: ""},
+        {name: "Hussain ali", rollNumber: "20751A04C7", studentNumber: "", parentNumber: ""},
+        {name: "S.Jashwanthi", rollNumber: "20751A04C8", studentNumber: "", parentNumber: ""},
+        {name: "Sk Karishma", rollNumber: "20751A04C9", studentNumber: "9392798819", parentNumber: "9701036302"},
+        {name: "D.Lavanya", rollNumber: "20751A04D0", studentNumber: "", parentNumber: ""},
+        {name: "S.Navya", rollNumber: "20751A04D1", studentNumber: "8247279444", parentNumber: "9014191879"},
+        {name: "S.Poornima", rollNumber: "20751A04D2", studentNumber: "", parentNumber: ""},
+        {name: "S R REHAMAN", rollNumber: "20751A04D3", studentNumber: "", parentNumber: ""},
+        {name: "S Sai charan", rollNumber: "20751A04D4", studentNumber: "", parentNumber: ""},
+        {name: "S. Umesh", rollNumber: "20751A04D6", studentNumber: "6300556331", parentNumber: "9676679357"},
+        {name: "S YOGESH", rollNumber: "20751A04D7", studentNumber: "", parentNumber: ""},
+        {name: "Sabiha S. H", rollNumber: "20751A04D8", studentNumber: "6309242491", parentNumber: "9642117128"},
+        {name: "S.Arkeswar", rollNumber: "20751A04D9", studentNumber: "6281785801", parentNumber: "9848517707"},
+        {name: "S Charan royal ", rollNumber: "20751A04E0", studentNumber: "", parentNumber: ""},
+        {name: "Shaik sameer basha ", rollNumber: "20751A04E1", studentNumber: "9494600227", parentNumber: "8008338336"},
+        {name: "Shaik Yasmin", rollNumber: "20751A04E2", studentNumber: "8688020829", parentNumber: "7993668249"},
+        {name: "S.naveen ", rollNumber: "20751A04E3", studentNumber: "7780668982", parentNumber: "8498907683"},
+        {name: "SUDHA KEERTHI SREE", rollNumber: "20751A04E4", studentNumber: "8106956532", parentNumber: "9490028779"},
+        {name: "T Kusuma", rollNumber: "20751A04E6", studentNumber: "9494264400", parentNumber: "9494274400"},
+        {name: "T. Tharun kumar", rollNumber: "20751A04E7", studentNumber: "6301587640", parentNumber: "6301587640"},
+        {name: "T. Dilliprasad", rollNumber: "20751A04E8", studentNumber: "9381305824", parentNumber: "9878009298"},
+        {name: "T.venkata sreenath", rollNumber: "20751A04E9", studentNumber: "9177962250", parentNumber: "9177431563"},
+        {name: "Thammisetty yamini ", rollNumber: "20751A04F0", studentNumber: "9494653890", parentNumber: "9493013890"},
+        {name: "T. N. Gangadhar reddy", rollNumber: "20751A04F1", studentNumber: "8601948211 ", parentNumber: "9989087668"},
+        {name: "Thappeta Narasimha Reddy", rollNumber: "20751A04F2", studentNumber: "8125311498", parentNumber: "9701029265"},
+        {name: "T.venkatesh", rollNumber: "20751A04F3", studentNumber: "9346702205", parentNumber: "8520827711"},
+        {name: "Udayagiri Pavan Kumar ", rollNumber: "20751A04F4", studentNumber: "6281947506", parentNumber: "8074690435"},
+        {name: "V Aswitha", rollNumber: "20751A04F5", studentNumber: "9154589014", parentNumber: "9177474459"},
+        {name: "V jagadeesh", rollNumber: "20751A04F6", studentNumber: "8179447919", parentNumber: "9581269464"},
+        {name: "V JAHNAVI", rollNumber: "20751A04F7", studentNumber: "9381853331 ", parentNumber: "7013130499"},
+        {name: "V.Monisha", rollNumber: "20751A04F8 ", studentNumber: "6305295207", parentNumber: "9030210165"},
+        {name: "V Adarsh", rollNumber: "20751A04F9", studentNumber: "7386341170", parentNumber: "6309717954"},
+        {name: "V.Venkata chaitanya ", rollNumber: "20751A04G0", studentNumber: "9177801596", parentNumber: "9505821593"},
+        {name: "V.Sandeep kumar", rollNumber: "20751A04G1", studentNumber: "7569904965", parentNumber: "9666266891"},
+        {name: "Vandavasi soni", rollNumber: "20751A04G2 ", studentNumber: "9492008329", parentNumber: "9491240419"},
+        {name: "V.Rohith", rollNumber: "20751A04G3", studentNumber: "9705155230", parentNumber: "7288834504"},
+        {name: "Yugandar", rollNumber: "20751A04G4", studentNumber: "6304003010", parentNumber: "9705819291"},
+        {name: "V.Bharath kumar", rollNumber: "20751A04G5", studentNumber: "9014320053 ", parentNumber: "9866429045"},
+        {name: "Y Reddy prasad ", rollNumber: "20751A04G6", studentNumber: "6301219860", parentNumber: "7702638966"},
+        {name: "M.MUNILAKSHMI", rollNumber: "21755A0409", studentNumber: "9392881217", parentNumber: "6281298476"},
+        {name: "P.Ishwarya ", rollNumber: "21755A0410", studentNumber: "9391931016", parentNumber: "9391431751"},
+        {name: "P.S. JYOTHSNA", rollNumber: "21755A0411", studentNumber: "8074905085", parentNumber: "9030239643"},
+        {name: "SHAIK.MUBASHEER", rollNumber: "21755A0413", studentNumber: "7893152890", parentNumber: "8367224263"},
+        {name: "VANGIMALLA LOKESH", rollNumber: "21755A0417", studentNumber: "6302566104", parentNumber: "9951032396"},
+        {name: "Y. Bhavana", rollNumber: "21755A0418", studentNumber: "9391158758", parentNumber: "9849677126"},
+            // Add more students here
+        ];
+        
+        const attendanceTableBody = document.getElementById("attendance-table-body");
+        const presentCount = document.getElementById("present-count");
+        const absentCount = document.getElementById("absent-count");
+        const absentStudentsList = document.getElementById("absent-students-list");
+        const absentStudentsRolls = document.getElementById("absent-students-rolls");
+        
+        // Generate table rows for each student
+        students.forEach(student => {
+            const row = document.createElement("tr");
+        
+            const nameCell = document.createElement("td");
+            nameCell.textContent = student.name;
+        
+            const rollNumberCell = document.createElement("td");
+            rollNumberCell.textContent = student.rollNumber;
+        
+            const attendanceStatusCell = document.createElement("td");
+            const attendanceStatusCheckbox = document.createElement("input");
+            attendanceStatusCheckbox.type = "checkbox";
+            attendanceStatusCheckbox.dataset.studentNumber = student.studentNumber;
+            attendanceStatusCheckbox.dataset.parentNumber = student.parentNumber;
+            attendanceStatusCell.appendChild(attendanceStatusCheckbox);
+        
+            const studentNumberCell = document.createElement("td");
+            studentNumberCell.textContent = student.studentNumber;
+        
+            const parentNumberCell = document.createElement("td");
+            parentNumberCell.textContent = student.parentNumber;
+        
+            row.appendChild(nameCell);
+            row.appendChild(rollNumberCell);
+            row.appendChild(attendanceStatusCell);
+            row.appendChild(studentNumberCell);
+            row.appendChild(parentNumberCell);
+        
+            attendanceTableBody.appendChild(row);
+        });
+        
+        // Update attendance counts when a checkbox is checked/unchecked
+        attendanceTableBody.addEventListener("change", event => {
+            if (event.target.type === "checkbox") {
+                const isChecked = event.target.checked;
+                if (isChecked) {
+                    presentCount.textContent = parseInt(presentCount.textContent) + 1;
+                } else {
+                    presentCount.textContent = parseInt(presentCount.textContent) - 1;
+                }
+                absentCount.textContent = students.length - parseInt(presentCount.textContent);
+        
+                // Show absent students' roll numbers
+                const absentRollNumbers = [];
+                students.forEach(student => {
+                    const attendanceStatusCheckbox = document.querySelector(`input[data-student-number="${student.studentNumber}"]`);
+                    if (!attendanceStatusCheckbox.checked) {
+                        absentRollNumbers.push(student.rollNumber);
+                    }
+                });
+        
+                if (absentRollNumbers.length > 0) {
+                    absentStudentsList.style.display = "block";
+                    absentStudentsRolls.innerHTML = absentRollNumbers.map(roll => `<li>${roll}</li>`).join("");
+                } else {
+                    absentStudentsList.style.display = "none";
+                    absentStudentsRolls.innerHTML = "";
+                }
+            }
+        });
+        
+        // Submit attendance
+        const attendanceForm = document.getElementById("attendance-form");
+        attendanceForm.addEventListener("submit", event => {
+            event.preventDefault();
+        
+            const date = document.getElementById("date").value;
+            const period = document.getElementById("period").value;
+        
+            // Filter absent students and collect their details
+            const absentStudentData = students.filter(student => {
+                const attendanceStatusCheckbox = document.querySelector(`input[data-student-number="${student.studentNumber}"]`);
+                return !attendanceStatusCheckbox.checked;
+            });
+        
+            // Store absent students' details in Firebase
+            if (absentStudentData.length > 0) {
+                database.ref("absent_students").push().set(absentStudentData)
+                    .then(() => {
+                        alert("Attendance submitted successfully!");
+                        attendanceForm.reset();
+                        presentCount.textContent = "0";
+                        absentCount.textContent = students.length;
+                        attendanceTableBody.querySelectorAll("input[type='checkbox']").forEach(checkbox => {
+                            checkbox.checked = false;
+                        });
+                        absentStudentsList.style.display = "none";
+                        absentStudentsRolls.innerHTML = "";
+                    })
+                    .catch(error => {
+                        console.error("Error submitting absent students' details:", error);
+                        alert("Failed to submit absent students' details. Please try again.");
+                    });
+            } else {
+                alert("All students are present. No data to submit.");
+            }
+        });
+        </script>
+</body>
+
+</html>
